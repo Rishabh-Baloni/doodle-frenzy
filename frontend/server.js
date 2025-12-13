@@ -240,7 +240,9 @@ async function start() {
   await nextApp.prepare()
   app.all('*', (req, res) => handle(req, res))
   const PORT = Number(process.env.PORT) || 4000
-  server.listen(PORT, () => {})
+  server.listen(PORT, () => {
+    console.log(`🚀 Unified app listening on port ${PORT}`)
+  })
   connectToDatabase().catch(err => {
     console.error('DB connect failed:', err?.message || err)
   })
