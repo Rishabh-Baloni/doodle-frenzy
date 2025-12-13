@@ -1,6 +1,6 @@
-# Draw and Guess Game (Doodle Frenzy)
+# 🎨 Doodle Frenzy
 
-A real-time multiplayer drawing and guessing game built with React, Node.js, Socket.IO, and MongoDB.
+A real-time multiplayer drawing and guessing game built with Next.js, Node.js, Socket.IO, and MongoDB. Challenge your friends to guess your drawings in this fast-paced, fun game!
 
 ## 🎮 Features
 
@@ -14,23 +14,25 @@ A real-time multiplayer drawing and guessing game built with React, Node.js, Soc
 ## 📁 Project Structure
 
 ```
-Draw and guess game/
+doodle-frenzy/
 ├── backend/              # Node.js + Express + Socket.IO server
 │   ├── models/          # MongoDB models (Game, Player)
 │   ├── routes/          # API routes
+│   ├── utils/           # Utility functions (word list)
 │   ├── index.js         # Server entry point
-│   └── .env             # Environment variables
+│   └── .env.example     # Environment variables template
 │
-├── frontend/            # React + Vite application
+├── frontend/            # Next.js 14 application
 │   ├── src/
-│   │   ├── components/  # React components
+│   │   ├── app/         # Next.js App Router pages
+│   │   ├── components/  # React components (game, lobby, common)
 │   │   ├── contexts/    # React contexts (GameContext)
-│   │   ├── hooks/       # Custom React hooks
-│   │   ├── pages/       # Page components
+│   │   ├── hooks/       # Custom React hooks (useCanvas, useChat)
 │   │   └── utils/       # Utilities (socket client)
-│   └── .env             # Frontend environment variables
+│   └── .env.example     # Frontend environment variables template
 │
-└── README.md           # This file
+├── render.yaml          # Render deployment configuration
+└── README.md            # This file
 ```
 
 ## 🚀 Getting Started
@@ -43,9 +45,8 @@ Draw and guess game/
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   cd "d:\Projects\Mini Project\New folder (3)\Draw and guess game"
+1. git clone https://github.com/Rishabh-Baloni/doodle-frenzy.git
+   cd doodle-frenzy
    ```
 
 2. **Install backend dependencies**
@@ -62,45 +63,72 @@ Draw and guess game/
 
 4. **Configure environment variables**
 
+   Create `.env` files based on the `.env.example` templates:
+
    Backend (`backend/.env`):
    ```env
-   MONGODB_URL=your_mongodb_connection_string
-   FRONTEND_URL=http://localhost:5173
-   PORT=4000
+   MONGODB_URI=your_mongodb_connection_string
+   FRONTEND_URL=http://localhost:3000
+   PORT=3001
    NODE_ENV=development
    ```
 
    Frontend (`frontend/.env.local`):
    ```env
-   NEXT_PUBLIC_API_BASE=http://localhost:4000
-   ```
+   NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
+   ```env
+#### Option 1: Using the batch file (Windows)
+```bash
+START-SERVERS.bat
+```
 
-### Running the Application
+#### Option 2: Manual start
 
-1. **Start the backend server** (in backend folder):
+1. **Start the backend server** (from project root):
    ```bash
+   cd backend
    npm run dev
    ```
-   Server will run on http://localhost:4000
+   Server will run on http://localhost:3001
 
-2. **Start the frontend development server** (in frontend folder):
-   ```bash
-   npm run dev
-   ```
-   Frontend will run on http://localhost:3000
+2. **Start the f on Render
 
-3. **Open your browser** and navigate to http://localhost:3000
+This project is configured for easy deployment on Render using the included `render.yaml` file.
 
-## 🚀 Deployment
+### Quick Deploy Steps
 
-### Deploy Frontend to Vercel
+1. **Set up MongoDB Atlas**
+   - Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+   - Create a database user and get your connection string
+   - Whitelist IP: `0.0.0.0/0` (for Render access)
 
-The frontend is now built with Next.js 14 and can be easily deployed to Vercel:
+2. **Deploy to Render**
+   - Go to [Render Dashboard](https://dashboard.render.com/)
+   - Click **"New"** → **"Blueprint"**
+   - Connect your GitHub repository
+   - Render will auto-detect `render.yaml` and create both services
 
-1. Push your code to GitHub
-2. Import to Vercel: https://vercel.com/new
-3. Set environment variable: `NEXT_PUBLIC_API_BASE=https://your-backend-url.com`
-4. Deploy!
+3. **Configure Environment Variables**
+   
+   **Backend Service:**
+   - `MONGODB_URI`: Your MongoDB Atlas connection string
+   - `FRONTEND_URL`: Your frontend URL (e.g., `https://doodle-frenzy-frontend.onrender.com`)
+   - `NODE_ENV`: `production`
+   - `PORT`: `10000` (auto-configured)
+
+   **Frontend Service:**
+   - `NEXT_PUBLIC_BACKEND_URL`: Your backend URL (e.g., `https://doodle-frenzy-backend.onrender.com`)
+   - `NODE_ENV`: `production`
+
+4. **Update URLs**
+   - After initial deployment, update the cross-referenced URLs in environment variables
+   - Trigger manual redeploy for both services
+
+### Important Notes
+
+- Free tier services spin down after inactivity (30-60s cold start)
+- Ensure MongoDB connection string is properly formatted
+- CORS is automatically configured via environment variables
 
 See [frontend/DEPLOYMENT.md](frontend/DEPLOYMENT.md) for detailed deployment instructions.
 
@@ -114,26 +142,28 @@ Deploy your backend to:
 Remember to:
 - Set all environment variables
 - Update MongoDB Atlas IP whitelist
-- Configure CORS for your frontend domain
+- Configure + Express.js** - Server framework
+- **Socket.IO** - Real-time bidirectional communication
+- **MongoDB + Mongoose** - Database and ODM
+- **CORS** - Cross-origin resource sharing
+- **dotenv** - Environment variable management
 
-## 🎯 How to Play
-
-1. **Create or Join a Game**
-   - Enter your name
-   - Create a new party (leave code blank) or join existing party (enter code)
-
-2. **Game Lobby**
-   - Host can configure game settings
-   - Wait for players to join
-   - Start the game when ready
+### Frontend
+- **Next.js 14** - React framework with App Router
+- **React 18** - UI library
+- **TypeScript** - Type safety
+- **Socket.IO Client** - Real-time communication
+- **Fabric.js** - Canvas drawing library
+- **Tailwind CSS** - Styling
 
 3. **Drawing Round**
-   - One player is chosen as the drawer
-   - Drawer sees the word and draws it
-   - Other players guess in the chat
-   - Points awarded based on guess order (1st: 100pts, 2nd: 60pts, 3rd: 40pts, others: 20pts)
-
-4. **Results**
+   GET /` - Health check
+- `POST /api/games` - Create new game
+- `POST /api/games/:partyCode/join` - Join existing game
+- `GET /api/games/:partyCode` - Get game state
+- `PATCH /api/games/:partyCode/settings` - Update game settings
+- `PATCH /api/games/:partyCode/start` - Start game
+- `PATCH /api/games/:partyCode/next-turn` - Advance to next turn
    - View final scores and leaderboard
    - Play again or return to home
 
@@ -150,22 +180,37 @@ Remember to:
 - **Next.js 14** - React framework with App Router
 - **React** - UI library
 - **Socket.IO Client** - WebSocket client
-- **Fabric.js** - Canvas drawing library
-- **Tailwind CSS** - Utility-first CSS framework
+- *🎯 Game Features
 
-## 📝 API Endpoints
+- **Multiple Drawing Tools**: Pencil, eraser, line, circle, rectangle
+- **Color Palette**: Choose from various colors
+- **Adjustable Brush Size**: Customize your drawing style
+- **Real-time Synchronization**: All players see drawings instantly
+- **Smart Scoring System**: Points based on guess speed
+- **Customizable Settings**: Rounds, time limits, custom word lists
+- **Party Code System**: Easy game sharing
+- **Responsive Design**: Works on desktop and mobile
 
-- `POST /api/games` - Create new game
-- `POST /api/games/:partyCode/join` - Join existing game
-- `GET /api/games/:partyCode` - Get game state
-- `PATCH /api/games/:partyCode/start` - Start game
-- `PATCH /api/games/:partyCode/next-turn` - Advance to next turn
-- `GET /health` - Health check endpoint
+## 🤝 Contributing
 
-## 🔌 Socket Events
+Contributions are welcome! Feel free to:
+- Report bugs
+- Suggest new features
+- Submit pull requests
 
-### Client → Server
-- `send-message` - Send chat message
+## 📄 License
+
+ISC
+
+## 🔗 Links
+
+- **GitHub Repository**: https://github.com/Rishabh-Baloni/doodle-frenzy
+- **Live Demo**: Coming soon!
+
+## 👤 Author
+
+**Rishabh Baloni**
+- GitHub: [@Rishabh-Baloni](https://github.com/Rishabh-Baloni) Send chat message
 - `update-drawing` - Sync canvas state
 - `join-game` - Join game room
 - `request-time-update` - Request time sync
