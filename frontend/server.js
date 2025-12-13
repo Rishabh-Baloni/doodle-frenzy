@@ -21,7 +21,11 @@ if (mongoose.connection.models['game']) delete mongoose.connection.models['game'
 if (mongoose.connection.models['player']) delete mongoose.connection.models['player']
 
 async function connectToDatabase() {
-  await mongoose.connect(process.env.MONGODB_URI, {
+  const uri = process.env.MONGODB_URI || process.env.MONGODB_URL
+  if (!uri) {
+    throw new Error('Missing MONGODB_URI or MONGODB_URL environment variable')
+  }
+  await mongoose.connect(uri, {
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 30000,
     maxPoolSize: 20,
@@ -230,14 +234,16 @@ app.use((err, req, res, next) => {
 })
 
 async function start() {
-  await connectToDatabase()
   const dev = false
   const nextApp = next({ dev, dir: __dirname })
   const handle = nextApp.getRequestHandler()
   await nextApp.prepare()
   app.all('*', (req, res) => handle(req, res))
-  const PORT = process.env.PORT || 4000
+  const PORT = Number(process.env.PORT) || 4000
   server.listen(PORT, () => {})
+  connectToDatabase().catch(err => {
+    console.error('DB connect failed:', err?.message || err)
+  })
 }
 
 start()
