@@ -19,8 +19,19 @@ lerna-debug.log*
 *.txt
 *.md
 !README.md
-!DEPLOYMENT_GUIDE.md
-!frontend/DEPLOYMENT.md
+
+# Development/Testing files
+test-runner.js
+debug-helper.js
+DEPLOYMENT_GUIDE.md
+READY_TO_DEPLOY.md
+PRE_DEPLOYMENT_CHECKLIST.md
+CANVAS_SYNC_TEST_PLAN.md
+GAME-FEATURES.md
+IMPLEMENTATION_SUMMARY.md
+TESTING_GUIDE.md
+TEST_REPORT.md
+QUICK-START.md
 
 # IDE
 .vscode/
