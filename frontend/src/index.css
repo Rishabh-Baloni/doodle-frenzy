@@ -1,0 +1,11 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-100;
+}
+
+.lobby-card {
+  @apply bg-white rounded-lg shadow-md p-4;
+}
