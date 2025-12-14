@@ -18,20 +18,19 @@ doodle-frenzy/
 ├── backend/              # Node.js + Express + Socket.IO server
 │   ├── models/          # MongoDB models (Game, Player)
 │   ├── routes/          # API routes
-│   ├── utils/           # Utility functions (word list)
-│   ├── index.js         # Server entry point
-│   └── .env.example     # Environment variables template
+│   └── utils/           # Utility functions (word list)
 │
 ├── frontend/            # Next.js 14 application
+│   ├── server.js        # Unified server (combines backend + frontend)
 │   ├── src/
 │   │   ├── app/         # Next.js App Router pages
 │   │   ├── components/  # React components (game, lobby, common)
 │   │   ├── contexts/    # React contexts (GameContext)
 │   │   ├── hooks/       # Custom React hooks (useCanvas, useChat)
 │   │   └── utils/       # Utilities (socket client)
-│   └── .env.example     # Frontend environment variables template
+│   └── .env.example     # Environment variables template
 │
-├── render.yaml          # Render deployment configuration
+├── package.json         # Root package with deploy scripts
 └── README.md            # This file
 ```
 
@@ -45,55 +44,42 @@ doodle-frenzy/
 
 ### Installation
 
-1. git clone https://github.com/Rishabh-Baloni/doodle-frenzy.git
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Rishabh-Baloni/doodle-frenzy.git
    cd doodle-frenzy
    ```
 
-2. **Install backend dependencies**
+2. **Install all dependencies**
    ```bash
-   cd backend
-   npm install
+   npm run build:render
    ```
+   This installs both frontend and backend dependencies.
 
-3. **Install frontend dependencies**
-   ```bash
-   cd ../frontend
-   npm install
-   ```
+3. **Configure environment variables**
 
-4. **Configure environment variables**
-
-   Create `.env` files based on the `.env.example` templates:
-
-   Backend (`backend/.env`):
+   Create a `.env` file in the project root:
    ```env
    MONGODB_URI=your_mongodb_connection_string
-   FRONTEND_URL=http://localhost:3000
-   PORT=3001
    NODE_ENV=development
+   PORT=3001
    ```
 
-   Frontend (`frontend/.env.local`):
-   ```env
-   NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
-   ```env
-#### Option 1: Using the batch file (Windows)
+### Running Locally
+
+**Start the unified server:**
 ```bash
-START-SERVERS.bat
+npm run start:render
 ```
 
-#### Option 2: Manual start
+The application will run on http://localhost:3001
+- Frontend: http://localhost:3001
+- Backend API: http://localhost:3001/api
+- Health Check: http://localhost:3001/health
 
-1. **Start the backend server** (from project root):
-   ```bash
-   cd backend
-   npm run dev
-   ```
-   Server will run on http://localhost:3001
+> **Note:** This project uses a monolith architecture where both frontend and backend run on the same server. ## 🌐 Deployment on Render
 
-2. **Start the f on Render
-
-This project is configured for easy deployment on Render using the included `render.yaml` file.
+This project is deployed as a **single unified service** combining frontend and backend.
 
 ### Quick Deploy Steps
 
@@ -104,45 +90,29 @@ This project is configured for easy deployment on Render using the included `ren
 
 2. **Deploy to Render**
    - Go to [Render Dashboard](https://dashboard.render.com/)
-   - Click **"New"** → **"Blueprint"**
-   - Connect your GitHub repository
-   - Render will auto-detect `render.yaml` and create both services
+   - Click **"New"** → **"Web Service"**
+   - Connect your GitHub repository: `Rishabh-Baloni/doodle-frenzy`
+   - Configure the service:
+     - **Build Command:** `npm run build:render`
+     - **Start Command:** `npm run start:render`
+     - **Environment:** Node
 
 3. **Configure Environment Variables**
-   
-   **Backend Service:**
    - `MONGODB_URI`: Your MongoDB Atlas connection string
-   - `FRONTEND_URL`: Your frontend URL (e.g., `https://doodle-frenzy-frontend.onrender.com`)
-   - `NODE_ENV`: `production`
-   - `PORT`: `10000` (auto-configured)
-
-   **Frontend Service:**
-   - `NEXT_PUBLIC_BACKEND_URL`: Your backend URL (e.g., `https://doodle-frenzy-backend.onrender.com`)
    - `NODE_ENV`: `production`
 
-4. **Update URLs**
-   - After initial deployment, update the cross-referenced URLs in environment variables
-   - Trigger manual redeploy for both services
+4. **Deploy**
+   - Click "Create Web Service"
+   - Wait for build and deployment to complete
+   - Your app will be live at `https://your-app-name.onrender.com`
 
 ### Important Notes
 
-- Free tier services spin down after inactivity (30-60s cold start)
-- Ensure MongoDB connection string is properly formatted
-- CORS is automatically configured via environment variables
+- Free tier services spin down after inactivity (~50s cold start on first request)
+- Ensure MongoDB connection string includes the database name
+- The monolith architecture runs both frontend and backend on a single server/port
 
-See [frontend/DEPLOYMENT.md](frontend/DEPLOYMENT.md) for detailed deployment instructions.
-
-### Deploy Backend
-
-Deploy your backend to:
-- **Railway**: https://railway.app
-- **Render**: https://render.com
-- **Heroku**: https://heroku.com
-
-Remember to:
-- Set all environment variables
-- Update MongoDB Atlas IP whitelist
-- Configure + Express.js** - Server framework
+See [frontend/DEPLOYMENT.md](frontend/DEPLOYMENT.md) for detailed deployment instructions. + Express.js** - Server framework
 - **Socket.IO** - Real-time bidirectional communication
 - **MongoDB + Mongoose** - Database and ODM
 - **CORS** - Cross-origin resource sharing
