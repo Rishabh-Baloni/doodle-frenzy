@@ -25,12 +25,30 @@ async function connectToDatabase() {
   if (!uri) {
     throw new Error('Missing MONGODB_URI or MONGODB_URL environment variable')
   }
+  
+  if (mongoose.connection.readyState === 1) {
+    console.log('MongoDB already connected')
+    return
+  }
+  
   await mongoose.connect(uri, {
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 30000,
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
     maxPoolSize: 20,
     retryWrites: true,
-    w: 'majority'
+    w: 'majority',
+    connectTimeoutMS: 30000,
+  })
+  
+  // Wait for connection to be fully ready
+  await new Promise((resolve, reject) => {
+    if (mongoose.connection.readyState === 1) {
+      resolve()
+    } else {
+      mongoose.connection.once('connected', resolve)
+      mongoose.connection.once('error', reject)
+      setTimeout(() => reject(new Error('Connection timeout')), 30000)
+    }
   })
 }
 
