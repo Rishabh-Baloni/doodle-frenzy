@@ -1,12 +1,17 @@
 // doodle-backend/routes/games.js
 const express = require('express');
 const router = express.Router();
-const Game = require('../models/game');
-const Player = require('../models/player');
+
+// NOTE: Models will be loaded when this module is called, not at require time
+// This prevents models from being created before database connection
 
 // NOTE: Socket.io "connection" handlers are in index.js
 
 module.exports = (io) => {
+  // Load models here, after DB connection is established
+  const Game = require('../models/game');
+  const Player = require('../models/player');
+  
   const timers = new Map();
 
   const startRoundTimer = async (partyCode, initial) => {

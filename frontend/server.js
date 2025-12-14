@@ -1,6 +1,6 @@
 require('dotenv').config()
 const express = require('express')
-const mongoose = require('mongoose')
+const mongoose = require('../backend/node_modules/mongoose') // Use backend's mongoose!
 const http = require('http')
 const { Server } = require('socket.io')
 const next = require('next')
@@ -58,48 +58,50 @@ app.use(express.urlencoded({ extended: true }))
 const activeSockets = new Map()
 const timers = new Map()
 
-async function startRoundTimer(partyCode) {
-  const existing = timers.get(partyCode)
-  if (existing) clearInterval(existing)
-  let g = await Game.findOne({ partyCode }).populate('players currentDrawer')
-  if (!g) return
-  let timeLeft = g.settings?.drawingTime || 60
-  await Game.findOneAndUpdate(
-    { partyCode },
-    { $set: { timeLeft, updatedAt: new Date() } },
-    { runValidators: false }
-  )
-  io.to(partyCode).emit('time-update', timeLeft)
-  const interval = setInterval(async () => {
-    try {
-      timeLeft = Math.max(0, timeLeft - 1)
-      await Game.findOneAndUpdate(
-        { partyCode },
-        { $set: { timeLeft, updatedAt: new Date() } },
-        { runValidators: false }
-      )
-      io.to(partyCode).emit('time-update', timeLeft)
-      if (timeLeft <= 0) {
-        clearInterval(interval)
-        timers.delete(partyCode)
-        g = await Game.findOne({ partyCode }).populate('players currentDrawer')
-        if (g) {
-          const entries = Array.isArray(g.guessedPlayers) ? g.guessedPlayers : []
-          const maxPoints = entries.reduce((m, e) => Math.max(m, e?.points || 0), 0)
-          if (maxPoints > 0 && g.currentDrawer) {
-            await Player.findByIdAndUpdate(g.currentDrawer._id || g.currentDrawer, { $inc: { score: Math.floor(maxPoints / 2) } })
+// Socket.IO handlers will be set up after models are loaded
+function setupSocketHandlers() {
+  async function startRoundTimer(partyCode) {
+    const existing = timers.get(partyCode)
+    if (existing) clearInterval(existing)
+    let g = await Game.findOne({ partyCode }).populate('players currentDrawer')
+    if (!g) return
+    let timeLeft = g.settings?.drawingTime || 60
+    await Game.findOneAndUpdate(
+      { partyCode },
+      { $set: { timeLeft, updatedAt: new Date() } },
+      { runValidators: false }
+    )
+    io.to(partyCode).emit('time-update', timeLeft)
+    const interval = setInterval(async () => {
+      try {
+        timeLeft = Math.max(0, timeLeft - 1)
+        await Game.findOneAndUpdate(
+          { partyCode },
+          { $set: { timeLeft, updatedAt: new Date() } },
+          { runValidators: false }
+        )
+        io.to(partyCode).emit('time-update', timeLeft)
+        if (timeLeft <= 0) {
+          clearInterval(interval)
+          timers.delete(partyCode)
+          g = await Game.findOne({ partyCode }).populate('players currentDrawer')
+          if (g) {
+            const entries = Array.isArray(g.guessedPlayers) ? g.guessedPlayers : []
+            const maxPoints = entries.reduce((m, e) => Math.max(m, e?.points || 0), 0)
+            if (maxPoints > 0 && g.currentDrawer) {
+              await Player.findByIdAndUpdate(g.currentDrawer._id || g.currentDrawer, { $inc: { score: Math.floor(maxPoints / 2) } })
+            }
+            await g.nextTurn()
+            await g.populate('players currentDrawer')
+            io.to(partyCode).emit('game:update', g)
           }
-          await g.nextTurn()
-          await g.populate('players currentDrawer')
-          io.to(partyCode).emit('game:update', g)
         }
-      }
-    } catch {}
-  }, 1000)
-  timers.set(partyCode, interval)
-}
+      } catch {}
+    }, 1000)
+    timers.set(partyCode, interval)
+  }
 
-io.on('connection', async (socket) => {
+  io.on('connection', async (socket) => {
   const { partyCode, playerId } = socket.handshake.query
   if (!partyCode) return
 
@@ -239,7 +241,8 @@ io.on('connection', async (socket) => {
   } catch {}
 
   socket.on('error', () => {})
-})
+  })
+}
 
 // API routes will be registered after DB connection in start()
 
@@ -262,6 +265,10 @@ async function start() {
     Player = require('../backend/models/player')
     gamesRouter = require('../backend/routes/games')
     console.log('✅ Models loaded')
+    
+    // Set up Socket.IO handlers now that models are available
+    setupSocketHandlers()
+    console.log('✅ Socket.IO handlers ready')
     
     // Set up API routes
     app.use('/api/games', gamesRouter(io))
