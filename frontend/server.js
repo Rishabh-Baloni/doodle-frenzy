@@ -4,9 +4,6 @@ const mongoose = require('mongoose')
 const http = require('http')
 const { Server } = require('socket.io')
 const next = require('next')
-const gamesRouter = require('../backend/routes/games')
-const Game = require('../backend/models/game')
-const Player = require('../backend/models/player')
 
 const app = express()
 const server = http.createServer(app)
@@ -16,6 +13,9 @@ const io = new Server(server, {
     skipMiddlewares: true
   }
 })
+
+// Don't load models here - load after connection
+let Game, Player, gamesRouter
 
 if (mongoose.connection.models['game']) delete mongoose.connection.models['game']
 if (mongoose.connection.models['player']) delete mongoose.connection.models['player']
@@ -241,7 +241,7 @@ io.on('connection', async (socket) => {
   socket.on('error', () => {})
 })
 
-app.use('/api/games', gamesRouter(io))
+// API routes will be registered after DB connection in start()
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy', dbState: mongoose.connection.readyState, activeSockets: activeSockets.size, environment: process.env.NODE_ENV || 'development' })
@@ -256,6 +256,15 @@ async function start() {
     // Connect to database first
     await connectToDatabase()
     console.log('✅ Database connected')
+    
+    // Load models AFTER database connection
+    Game = require('../backend/models/game')
+    Player = require('../backend/models/player')
+    gamesRouter = require('../backend/routes/games')
+    console.log('✅ Models loaded')
+    
+    // Set up API routes
+    app.use('/api/games', gamesRouter(io))
     
     // Initialize Next.js
     const dev = false
