@@ -25,6 +25,7 @@ backend/**/*.md
 # Development/Testing files
 test-runner.js
 debug-helper.js
+test-db.js
 DEPLOYMENT_GUIDE.md
 READY_TO_DEPLOY.md
 PRE_DEPLOYMENT_CHECKLIST.md
