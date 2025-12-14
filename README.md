@@ -2,6 +2,8 @@
 
 A real-time multiplayer drawing and guessing game built with Next.js, Node.js, Socket.IO, and MongoDB. Challenge your friends to guess your drawings in this fast-paced, fun game!
 
+🌐 **Live Demo:** https://doodle-frenzy.onrender.com
+
 ## 🎮 Features
 
 - **Real-time multiplayer gameplay** using Socket.IO
