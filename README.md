@@ -112,7 +112,10 @@ This project is deployed as a **single unified service** combining frontend and 
 - Ensure MongoDB connection string includes the database name
 - The monolith architecture runs both frontend and backend on a single server/port
 
-See [frontend/DEPLOYMENT.md](frontend/DEPLOYMENT.md) for detailed deployment instructions. + Express.js** - Server framework
+## 🛠️ Tech Stack
+
+### Backend
+- **Node.js + Express.js** - Server framework
 - **Socket.IO** - Real-time bidirectional communication
 - **MongoDB + Mongoose** - Database and ODM
 - **CORS** - Cross-origin resource sharing
