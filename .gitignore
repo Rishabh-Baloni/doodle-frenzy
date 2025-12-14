@@ -26,6 +26,8 @@ backend/**/*.md
 test-runner.js
 debug-helper.js
 test-db.js
+START-SERVERS.bat
+render.yaml
 DEPLOYMENT_GUIDE.md
 READY_TO_DEPLOY.md
 PRE_DEPLOYMENT_CHECKLIST.md
