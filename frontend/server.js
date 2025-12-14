@@ -234,18 +234,32 @@ app.use((err, req, res, next) => {
 })
 
 async function start() {
-  const dev = false
-  const nextApp = next({ dev, dir: __dirname })
-  const handle = nextApp.getRequestHandler()
-  await nextApp.prepare()
-  app.all('*', (req, res) => handle(req, res))
-  const PORT = Number(process.env.PORT) || 4000
-  server.listen(PORT, () => {
-    console.log(`🚀 Unified app listening on port ${PORT}`)
-  })
-  connectToDatabase().catch(err => {
-    console.error('DB connect failed:', err?.message || err)
-  })
+  try {
+    // Connect to database first
+    await connectToDatabase()
+    console.log('✅ Database connected')
+    
+    // Initialize Next.js
+    const dev = false
+    const nextApp = next({ dev, dir: __dirname })
+    const handle = nextApp.getRequestHandler()
+    
+    console.log('⏳ Preparing Next.js...')
+    await nextApp.prepare()
+    console.log('✅ Next.js ready')
+    
+    // Next.js handle all remaining requests
+    app.use((req, res) => handle(req, res))
+    
+    const PORT = Number(process.env.PORT) || 3001
+    server.listen(PORT, () => {
+      console.log(`🚀 Unified app listening on http://localhost:${PORT}`)
+      console.log(`📊 Health check: http://localhost:${PORT}/health`)
+    })
+  } catch (err) {
+    console.error('❌ Failed to start server:', err)
+    process.exit(1)
+  }
 }
 
 start()
